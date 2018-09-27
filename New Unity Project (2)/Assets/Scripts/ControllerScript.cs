@@ -22,6 +22,7 @@ public class ControllerScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        highScores = new List<ListEntry>();
         ListEntry e = new ListEntry { _name = "", _score = 0 };
         for (int i=0; i<10; i++)
         {
