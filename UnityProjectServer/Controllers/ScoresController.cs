@@ -21,16 +21,23 @@ namespace UnityProjectServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ScoreEntry[]> Get()
+        [HttpGet("{name}")]
+        public async Task<ScoreEntry[]> Get(int? slice, string name)
         {
-            return await _processor.TopTen();
+            if (slice.HasValue)
+            {
+                if (slice > 1 && slice < 5000)
+                {
+                    return await _processor.GetScoresFrom((int)slice);
+                }
+            }
+            if (!string.IsNullOrEmpty(name))
+            {
+                return await _processor.PlayersBestScores(name);
+            }
+            return await _processor.GetScoresFrom(0);
         }
 
-        [HttpGet("{name}")]
-        public ActionResult<string> Get(string name)
-        {
-            return "value";
-        }
 
         [HttpPost]
         public async Task<EntryResult> Post([FromBody] NewEntry newEntry)
@@ -39,13 +46,15 @@ namespace UnityProjectServer.Controllers
         }
 
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public string Put(int id, [FromBody] string value)
         {
+            return "Sorry mate, no cheese.";
         }
 
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public string Delete(int id)
         {
+            return "Can't do that, sorry.";
         }
     }
 }

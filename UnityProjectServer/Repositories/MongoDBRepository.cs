@@ -3,6 +3,8 @@ using UnityProjectServer.MongoDB;
 using UnityProjectServer.Models;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using MongoDB.Bson;
 
 namespace UnityProjectServer.Repositories
 {
@@ -135,12 +137,23 @@ namespace UnityProjectServer.Repositories
             return await cursor.FirstAsync();
         }
 
-        public async Task<ScoreEntry[]> TopTen()
+        public async Task<ScoreEntry[]> GetScoresDescending()
         {
+            /*
             var sort = Builders<ScoreEntry>.Sort.Descending("Score");
             var cursor = _scores.Find(_=> true).Sort(sort).Limit(10);
             var scores = await cursor.ToListAsync();
             return scores.ToArray();
+            */
+            
+            var filter = Builders<Player>.Filter.Eq("Banned", false);
+            var players = await _players.Find(filter).ToListAsync();
+
+            var sort = Builders<ScoreEntry>.Sort.Descending("Score");
+            var cursor = _scores.Find(_=> true).Sort(sort);
+            var scores = await cursor.ToListAsync();
+            return scores.ToArray();
+            
         }
 
         public async Task<Player> SetBannedStatusWithName(string name, bool banned)
@@ -165,7 +178,8 @@ namespace UnityProjectServer.Repositories
             {
                 player.Banned = true;
             }
-            return await _players.FindOneAndReplaceAsync(filter, player);
+            await _players.FindOneAndReplaceAsync(filter, player);
+            return player;
         }
 
         public async Task<Player> SetBannedStatusWithID(Guid id, bool banned)
@@ -190,7 +204,18 @@ namespace UnityProjectServer.Repositories
             {
                 player.Banned = true;
             }
-            return await _players.FindOneAndReplaceAsync(filter, player);
+            await _players.FindOneAndReplaceAsync(filter, player);
+            return player;
+        }
+
+        public async Task<ScoreEntry[]> GetPlayersScores(string name)
+        {
+            var filter = Builders<ScoreEntry>.Filter.Eq("Name", name);
+            var sort = Builders<ScoreEntry>.Sort.Descending("Score");
+
+            var cursor = _scores.Find(filter).Sort(sort);
+            var scores = await cursor.ToListAsync();
+            return scores.ToArray();
         }
     }
 }

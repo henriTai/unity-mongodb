@@ -1,12 +1,22 @@
-28.9 Version
+Version 2
+
+New features summary:
+	* Corrected admin authorization (see below)
+	* Authorization is activated.
+	* Model validation for new score entries are activated.
+	* Banned players are sorted out from score lists.
+	* ?slice=[int] query is added for high score list.
+	* Added an option to get a array of all the score entries of one player.
 
 Configurations:
 
 *database path is defined in MongoDB.cs and is "mongodb://localhost:27017"
 *Authorization key for Unity client ("UnityKey") is set in appsettings.json and is "unity1234"
-*Authorization key for admin ("_adminKey") is set in AuthenticationMiddleware.cs and is "admin123"
-*Right now authorization features are NOT hooked up.
-*model validation is not yet implemented
+||||||||||||||*** CORRECTION *** ||||||||||||||||>>>
+*Authorization key for admin ("UnityKey" also) is set in AuthenticationMiddleware.cs and is "admin123"
+*PUT operations (banning) is only allowed with admin authorization (DELETE is not implemented yet) using 'players'-path.
+*Right now authorization IS hooked up.
+*model validation for score entry is implemented.
 
 **************************************************************************************************
 
@@ -143,7 +153,13 @@ GET: Get returns top10-list of high scores. The response message in json-format 
 	}
 
 ]
-*Note: At this moment, the banned players are not sorted out from the list but will be.
+*Banned players are sorted out from the list.
+
+GET +?slice=[int]
+	* returns high score array STARTING FROM THE GIVEN RANK.
+
+GET .../[Name]
+	* returns an array of all the scores of one player
 
 POST: Post takes new score entry information from the body and is in following format:
 

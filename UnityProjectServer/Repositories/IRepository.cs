@@ -7,7 +7,7 @@ namespace UnityProjectServer.Repositories
 {
     public interface IRepository
     {
-        Task<ScoreEntry[]> TopTen();
+        Task<ScoreEntry[]> GetScoresDescending();
         Task<EntryResult> AddNewEntry(ScoreEntry entry);
 
         Task<Player[]> GetAllPlayers();
@@ -22,6 +22,7 @@ namespace UnityProjectServer.Repositories
         Task<Player> ChangeBannedStatusWithName(string name);
         Task<Player> SetBannedStatusWithID(Guid id, bool banned);
         Task<Player> ChangeBannedStatusWithID(Guid id);
+        Task<ScoreEntry[]> GetPlayersScores(string name);
     }
 
 }
