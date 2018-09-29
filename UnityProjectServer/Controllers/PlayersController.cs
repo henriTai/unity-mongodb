@@ -73,10 +73,16 @@ namespace UnityProjectServer.Controllers
 
         [HttpDelete("{id:Guid}")]
         [HttpDelete("{name}")]
-        public string Delete(Guid id, string name)
+        public async Task<string> Delete(Guid id, string name)
         {
-            return "This is still under construction.";
-            //When a player is deleted, all the related score entries have to be deleted too.
+            if (!string.IsNullOrEmpty(name))
+            {
+                return await _processor.DeletePlayer(name);
+            }
+            else
+            {
+                return await _processor.DeletePlayerWithID(id);
+            }
         }
     }
 }

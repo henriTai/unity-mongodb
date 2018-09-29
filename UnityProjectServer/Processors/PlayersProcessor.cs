@@ -59,5 +59,47 @@ namespace UnityProjectServer.Processors
         {
             return await _repository.ChangeBannedStatusWithID(id);
         }
+
+        public async Task<string> DeletePlayer(string name)
+        {
+            var player = await _repository.SetBannedStatusWithName(name, true);
+            if (player==null)
+            {
+                string result = "There is no player with name " + name;
+                return result;
+            }
+            else
+            {
+                await _repository.DeletePlayersScores(name);
+                await _repository.DeletePlayer(player._id);
+                return ParseDeleteInfo(player);
+            }
+            
+        }
+
+        public async Task<string> DeletePlayerWithID(Guid id)
+        {
+            var player = await _repository.SetBannedStatusWithID(id, true);
+            if (player==null)
+            {
+                string result = "There is no player with id " + id;
+                return result;
+            }
+            else
+            {
+                await _repository.DeletePlayersScores(player.Name);
+                await _repository.DeletePlayer(id);
+                return ParseDeleteInfo(player);
+            }
+        }
+
+        private string ParseDeleteInfo(Player player)
+        {
+            string result = "Player " + player.Name;
+            result += " (";
+            result += player._id;
+            result += ") is deleted.";
+            return result;
+        }
     }
 }

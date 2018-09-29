@@ -50,6 +50,18 @@ namespace UnityProjectServer.Controllers
             return await _processor.GetScoresFrom(0, 0);
         }
 
+        [HttpGet("common")]
+        public async Task<int> GetCommonScore()
+        {
+            return await _processor.GetCommonScore();
+        }
+
+        [HttpGet("average")]
+        public async Task<float> GetAverageScore()
+        {
+            return await _processor.GetAverageScore();
+        }
+
 
         [HttpPost]
         public async Task<EntryResult> Post([FromBody] NewEntry newEntry)

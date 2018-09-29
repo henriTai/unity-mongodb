@@ -23,6 +23,9 @@ namespace UnityProjectServer.Repositories
         Task<Player> SetBannedStatusWithID(Guid id, bool banned);
         Task<Player> ChangeBannedStatusWithID(Guid id);
         Task<ScoreEntry[]> GetPlayersScores(string name, int timeFrame);
+        Task <bool> DeletePlayersScores(string name);
+        Task<bool> DeletePlayer(Guid id);
+
     }
 
 }
