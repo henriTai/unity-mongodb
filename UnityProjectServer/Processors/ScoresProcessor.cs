@@ -15,10 +15,10 @@ namespace UnityProjectServer.Processors
             _repository = repository;
         }
 
-        public async Task<ScoreEntry[]> GetScoresFrom(int rank)
+        public async Task<ScoreEntry[]> GetScoresFrom(int rank, int days)
         {
             var players = await _repository.GetPlayersWithBannedStatus(false);
-            var scores = await _repository.GetScoresDescending();
+            var scores = await _repository.GetScoresDescending(days);
 
             List<ScoreEntry> entries = new List<ScoreEntry>();
             if (scores.Length > 0)
@@ -48,7 +48,8 @@ namespace UnityProjectServer.Processors
             return entries.ToArray();
         }
 
-        public async Task<ScoreEntry[]> PlayersBestScores(string name)
+
+        public async Task<ScoreEntry[]> PlayersBestScores(string name, int timeFrame)
         {
             var player = await _repository.GetPlayer(name);
             if (player == null || player.Banned)
@@ -58,7 +59,7 @@ namespace UnityProjectServer.Processors
             }
             else
             {
-                return await _repository.GetPlayersScores(player.Name);
+                return await _repository.GetPlayersScores(player.Name, timeFrame);
             }
         }
 

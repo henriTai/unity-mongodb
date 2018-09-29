@@ -104,14 +104,15 @@ namespace UnityProjectServer.Repositories
         {
             var filter = Builders<Player>.Filter.Eq(p => p.Name, name);
             var cursor = await _players.FindAsync(filter);
-            return await cursor.FirstAsync();
+            var player = await cursor.FirstOrDefaultAsync();
+            return player;
         }
 
         public async Task<Player> GetPlayerWithID (Guid id)
         {
             var filter = Builders<Player>.Filter.Eq(p => p._id, id);
             var cursor = await _players.FindAsync(filter);
-            return await cursor.FirstAsync();
+            return await cursor.FirstOrDefaultAsync();
         }
 
         public async Task<Player[]> GetPlayersWithBannedStatus(bool status)
@@ -125,7 +126,7 @@ namespace UnityProjectServer.Repositories
         {
             var filter = Builders<Player>.Filter.Eq(p => p.Name, name);
             var cursor = await _players.FindAsync(filter);
-            var player = await cursor.FirstAsync();
+            var player = await cursor.FirstOrDefaultAsync();
             return player.Banned;
         }
 
@@ -134,10 +135,10 @@ namespace UnityProjectServer.Repositories
             var filter = Builders<Player>.Filter.Eq(p => p.Name, player.Name);
             await _players.ReplaceOneAsync(filter, player);
             var cursor = await _players.FindAsync(filter);
-            return await cursor.FirstAsync();
+            return await cursor.FirstOrDefaultAsync();
         }
 
-        public async Task<ScoreEntry[]> GetScoresDescending()
+        public async Task<ScoreEntry[]> GetScoresDescending(int days)
         {
             /*
             var sort = Builders<ScoreEntry>.Sort.Descending("Score");
@@ -145,12 +146,23 @@ namespace UnityProjectServer.Repositories
             var scores = await cursor.ToListAsync();
             return scores.ToArray();
             */
-            
+            FilterDefinition<ScoreEntry> scorefilter;
+            if (days <= 0)
+            {
+                scorefilter = Builders<ScoreEntry>.Filter.Empty;
+            }
+            else
+            {
+                DateTime dt = DateTime.UtcNow;
+                dt = dt.AddDays(-days);
+                DateTime ddt = new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0).ToUniversalTime();
+                scorefilter = Builders<ScoreEntry>.Filter.Gt(s => s.Date, ddt);
+            }
             var filter = Builders<Player>.Filter.Eq("Banned", false);
             var players = await _players.Find(filter).ToListAsync();
 
             var sort = Builders<ScoreEntry>.Sort.Descending("Score");
-            var cursor = _scores.Find(_=> true).Sort(sort);
+            var cursor = _scores.Find(scorefilter).Sort(sort);
             var scores = await cursor.ToListAsync();
             return scores.ToArray();
             
@@ -162,14 +174,15 @@ namespace UnityProjectServer.Repositories
             var set = Builders<Player>.Update.Set(p => p.Banned, banned);
             await _players.FindOneAndUpdateAsync(filter, set);
             var cursor = await _players.FindAsync(filter);
-            return await cursor.FirstAsync();
+            return await cursor.FirstOrDefaultAsync();
         }
 
         public async Task<Player> ChangeBannedStatusWithName(string name)
         {
             var filter = Builders<Player>.Filter.Eq(p => p.Name, name);
             var cursor = await _players.FindAsync(filter);
-            var player = await cursor.FirstAsync();
+            var player = await cursor.FirstOrDefaultAsync();
+            if (player == null) return player;
             if (player.Banned)
             {
                 player.Banned = false;
@@ -188,14 +201,15 @@ namespace UnityProjectServer.Repositories
             var set = Builders<Player>.Update.Set(p => p.Banned, banned);
             await _players.FindOneAndUpdateAsync(filter, set);
             var cursor = await _players.FindAsync(filter);
-            return await cursor.FirstAsync();
+            return await cursor.FirstOrDefaultAsync();
         }
 
         public async Task<Player> ChangeBannedStatusWithID(Guid id)
         {
             var filter = Builders<Player>.Filter.Eq(p => p._id, id);
             var cursor = await _players.FindAsync(filter);
-            var player = await cursor.FirstAsync();
+            var player = await cursor.FirstOrDefaultAsync();
+            if (player==null) return player;
             if (player.Banned)
             {
                 player.Banned = false;
@@ -208,9 +222,24 @@ namespace UnityProjectServer.Repositories
             return player;
         }
 
-        public async Task<ScoreEntry[]> GetPlayersScores(string name)
+        public async Task<ScoreEntry[]> GetPlayersScores(string name, int timeFrame)
         {
-            var filter = Builders<ScoreEntry>.Filter.Eq("Name", name);
+            FilterDefinition<ScoreEntry> filter;
+            DateTime dt = DateTime.Now;
+            dt = dt.AddDays(-timeFrame);
+
+            dt.ToUniversalTime();
+            DateTime ddt = new DateTime (dt.Year, dt.Month, dt.Day, 0, 0, 0).ToUniversalTime();
+            
+            if (timeFrame==0)
+            {
+                filter = Builders<ScoreEntry>.Filter.Eq("Name", name);
+            }
+            else
+            {
+                filter = Builders<ScoreEntry>.Filter.Eq("Name", name) & 
+                Builders<ScoreEntry>.Filter.Gt(s => s.Date, ddt);
+            }
             var sort = Builders<ScoreEntry>.Sort.Descending("Score");
 
             var cursor = _scores.Find(filter).Sort(sort);

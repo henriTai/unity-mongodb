@@ -22,20 +22,32 @@ namespace UnityProjectServer.Controllers
 
         [HttpGet]
         [HttpGet("{name}")]
-        public async Task<ScoreEntry[]> Get(int? slice, string name)
+        public async Task<ScoreEntry[]> Get(int? slice, string name, int? days)
         {
             if (slice.HasValue)
             {
                 if (slice > 1 && slice < 5000)
                 {
-                    return await _processor.GetScoresFrom((int)slice);
+                    if (days.HasValue && (int) days > 0)
+                    {
+                        return await _processor.GetScoresFrom((int)slice, (int) days);
+                    }
+                    return await _processor.GetScoresFrom((int)slice, 0);
                 }
             }
             if (!string.IsNullOrEmpty(name))
             {
-                return await _processor.PlayersBestScores(name);
+                if (days.HasValue && (int) days > 0)
+                {
+                    return await _processor.PlayersBestScores(name, (int)days);
+                }
+                return await _processor.PlayersBestScores(name, 0);
             }
-            return await _processor.GetScoresFrom(0);
+            if (days.HasValue)
+            {
+                return await _processor.GetScoresFrom(0, (int) days);
+            }
+            return await _processor.GetScoresFrom(0, 0);
         }
 
 

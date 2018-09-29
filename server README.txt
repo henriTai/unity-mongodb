@@ -1,3 +1,10 @@
+Version 3
+
+New features summary:
+	* Eliminated exceptions caused by queries with non-existent names / ids
+	* ?days=[int] query is added to limit timeframe to last x days. Works also
+	in combination with ?slice=[int] query and with all-players and single-player queries.
+
 Version 2
 
 New features summary:
@@ -157,9 +164,15 @@ GET: Get returns top10-list of high scores. The response message in json-format 
 
 GET +?slice=[int]
 	* returns high score array STARTING FROM THE GIVEN RANK.
+GET +?days=[int]
+	* returns high score array from the last [int] days.
+GET +?slice=[int]&days=[int]
+	* Combines the two methods above.
 
 GET .../[Name]
 	* returns an array of all the scores of one player
+GET .../[Name]?days=[int]
+	* returns player [Name]'s best scores from last [int] days.
 
 POST: Post takes new score entry information from the body and is in following format:
 
