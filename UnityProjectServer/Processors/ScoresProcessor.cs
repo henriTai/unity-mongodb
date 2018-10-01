@@ -133,7 +133,60 @@ namespace UnityProjectServer.Processors
                 entry.Score = newEntry.Score;
                 entry._id = Guid.NewGuid();
 
-                return await _repository.AddNewEntry(entry);
+                await _repository.AddNewEntry(entry);
+
+                var notBanned = await _repository.GetPlayersWithBannedStatus(false);
+                var allScores = await _repository.GetScoresDescending(0);
+
+                List<ScoreEntry> scores = new List<ScoreEntry>();
+
+                for (int i = 0; i < allScores.Length; i++)
+                {
+                    bool found = false;
+                    for (int j = 0; j < notBanned.Length; j++)
+                    {
+                        if (notBanned[j].Name.Equals(allScores[i].Name))
+                        {
+                            found = true;
+                            scores.Add(allScores[i]);
+                            break;
+                        }
+                        if (found) break;
+                    }
+                    if (allScores[i]._id == entry._id) break;
+                }
+                EntryResult result = new EntryResult();
+                result.Name = entry.Name;
+                result.Banned = false;
+                result.Score = entry.Score;
+                result.Ranking = 0;     //these are initialized just in case the score didn't
+                result.BestRanking = 0; // the score didn't make it to the whole list (list is
+                result.BestScore = entry.Score; //at max size and the score was lower than the last one)
+                                                //and players hasn't any other scores in the list.
+
+                bool bestFound = false;
+                bool thisFound = false;
+                for (int i = 0; i < scores.Count; i++)
+                {
+                    if (scores[i].Name.Equals(entry.Name))
+                    {
+                        if (!bestFound)
+                        {
+                            bestFound = true;
+                            result.BestScore = scores[i].Score;
+                            result.BestRanking = i + 1;
+                        }
+                        if (scores[i]._id == entry._id)
+                        {
+                            thisFound = true;
+                            result.Ranking = i + 1;
+                        }
+                    }
+                    if (thisFound) break;
+                }
+
+                return result;
+
             }
         }
     }

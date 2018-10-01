@@ -1,3 +1,7 @@
+Version 5
+
+	* Fixed missing sorting out of banned players in ranking info of EntryResults.
+
 Version 4
 
 New features summary:
