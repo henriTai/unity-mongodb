@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Version 5
 
 	* Fixed missing sorting out of banned players in ranking info of EntryResults.
@@ -9,6 +10,8 @@ New features summary:
 	* ...scores/common: get the most common score (banned excluded)
 	* ...scores/average: get the average of scores (banned excluded)
 
+=======
+>>>>>>> parent of f09c584... Version 4 README
 Version 3
 
 New features summary:
@@ -184,10 +187,6 @@ GET .../[Name]
 	* returns an array of all the scores of one player
 GET .../[Name]?days=[int]
 	* returns player [Name]'s best scores from last [int] days.
-GET .../common
-	*Get the most common score (banned excluded)
-GET .../average
-	* Get the average of scores (banned excluded)
 
 POST: Post takes new score entry information from the body and is in following format:
 
@@ -262,6 +261,5 @@ http://localhost:5000/api/players/1a0a0cc1-dc57-4612-8330-f8137a151593?banned=tr
 http://localhost:5000/api/players/1a0a0cc1-dc57-4612-8330-f8137a151593 (changes banned status)
 
 DELETE:
-	+/[Name]
-	* Removes named player and all associated scores.
+	This is not implemented yet. If player is removed, all the associated scores should also be removed. I guess this should be done atomically in both collections.
 

@@ -246,20 +246,5 @@ namespace UnityProjectServer.Repositories
             var scores = await cursor.ToListAsync();
             return scores.ToArray();
         }
-
-        public async Task<bool> DeletePlayersScores(string name)
-        {
-            var filter = Builders<ScoreEntry>.Filter.Eq("Name", name);
-            await _scores.DeleteManyAsync(filter);
-            return true;
-        }
-
-        public async Task<bool> DeletePlayer(Guid id)
-        {
-            var filter = Builders<Player>.Filter.Eq("_id", id);
-            await _players.DeleteOneAsync(filter);
-            return true;
-        }
-
     }
 }

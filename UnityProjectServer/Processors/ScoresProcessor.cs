@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityProjectServer.Models;
 using UnityProjectServer.Repositories;
@@ -62,52 +61,6 @@ namespace UnityProjectServer.Processors
             {
                 return await _repository.GetPlayersScores(player.Name, timeFrame);
             }
-        }
-
-        public async Task<float> GetAverageScore()
-        {
-            var players = await _repository.GetPlayersWithBannedStatus(false);
-            List<ScoreEntry[]> scores = new List<ScoreEntry[]>();
-            foreach (Player p in players)
-            {
-                ScoreEntry[] sublist = await _repository.GetPlayersScores(p.Name, 0);
-                scores.Add(sublist);
-            }
-            int summary = 0;
-            int numberOfScores = 0;
-            foreach (ScoreEntry[] s in scores)
-            {
-                for (int i = 0; i < s.Length; i++)
-                {
-                    summary += s[i].Score;
-                    numberOfScores++;
-                }
-            }
-            return (float) summary / (float) numberOfScores;
-            
-        }
-
-        public async Task<int> GetCommonScore()
-        {
-            var players = await _repository.GetPlayersWithBannedStatus(false);
-            List<ScoreEntry[]> scores = new List<ScoreEntry[]>();
-            foreach (Player p in players)
-            {
-                ScoreEntry[] sublist = await _repository.GetPlayersScores(p.Name, 0);
-                scores.Add(sublist);
-            }
-            Dictionary <int, int> dict = new Dictionary<int, int>();
-            foreach (ScoreEntry[] s in scores)
-            {
-                for (int i = 0; i < s.Length; i++)
-                {
-                    int thisScore = s[i].Score;
-                    dict.TryGetValue(thisScore, out var currentCount);
-                    dict[thisScore] = currentCount + 1;
-                }
-            } 
-            var a = dict.FirstOrDefault(x => x.Value == dict.Values.Max()).Key;
-            return a;
         }
 
         public async Task<EntryResult> AddNewEntry(NewEntry newEntry)
