@@ -1,11 +1,14 @@
-﻿using System.Collections;
+﻿/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 using System.ComponentModel;
 
+[Serializable]
 public class ListEntry {
 
-    public string _name { get; set; }
-    public int _score { get; set; }
+    public string _name;
+    public int _score;
 
 }
+*/
