@@ -92,7 +92,6 @@ public class ControllerScript : MonoBehaviour {
 
     public void UpdateHighScores()
     {
-        StopCoroutine(GetHighScores());
         StartCoroutine(GetHighScores());
 
         //List<ListEntry> entries = (List<ListEntry>)RestfulRequester.GetHighScores();
@@ -143,7 +142,7 @@ public class ControllerScript : MonoBehaviour {
         UnityWebRequest req = UnityWebRequest.Get(uri);
         req.SetRequestHeader("Content-Type", "application/json");
         req.SetRequestHeader("UnityKey", "unity1234");
-        var getter = req.SendWebRequest();
+        yield return req.SendWebRequest();
         //Debug.Log(req.isHttpError);
         //Debug.Log(req.isNetworkError);
         //Debug.Log(req.downloadHandler.text);
@@ -152,32 +151,28 @@ public class ControllerScript : MonoBehaviour {
         //HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         //StreamReader reader = new StreamReader(response.GetResponseStream());
 
-        while (true)
+        if (req.isDone && !req.isHttpError && !req.isNetworkError)
         {
-            if (req.isDone && !req.isHttpError && !req.isNetworkError)
+            string jsonResponse = req.downloadHandler.text;
+            Debug.Log("Recieved this: " + jsonResponse);
+            Scores info = JsonUtility.FromJson<Scores>("{\"scores\":" + jsonResponse.ToString() + "}");
+            //List<ScoreEntry> entries = new List<ScoreEntry>();
+            //foreach (ScoreEntry score in info.scores)
+            //{
+            //    entries.Add(new ScoreEntry { Name = score.Name, Score = score.Score });
+            //}
+
+            highScores = info;
+
+            for (int i = 0; i < highScores.scores.Count; i++)
             {
-                string jsonResponse = req.downloadHandler.text;
-                Debug.Log("Recieved this: " + jsonResponse);
-                Scores info = JsonUtility.FromJson<Scores>("{\"scores\":" + jsonResponse.ToString() + "}");
-                //List<ScoreEntry> entries = new List<ScoreEntry>();
-                //foreach (ScoreEntry score in info.scores)
-                //{
-                //    entries.Add(new ScoreEntry { Name = score.Name, Score = score.Score });
-                //}
-
-                highScores = info;
-
-                for (int i = 0; i < highScores.scores.Count; i++)
+                if (highScores.scores[i].name != "" || highScores.scores[i].score != 0)
                 {
-                    if (highScores.scores[i].name != "" || highScores.scores[i].score != 0)
-                    {
-                        Names[i].text = highScores.scores[i].name;
-                        Scores[i].text = ScoreToString(highScores.scores[i].score);
-                    }
+                    Names[i].text = highScores.scores[i].name;
+                    Scores[i].text = ScoreToString(highScores.scores[i].score);
                 }
-
-                break;
             }
+
         }
         //yield return entries;
 
@@ -197,22 +192,17 @@ public class ControllerScript : MonoBehaviour {
         req.uploadHandler = new UploadHandlerRaw(bytes);
         req.uploadHandler.contentType = "application/json";
 
-        var poster = req.SendWebRequest();
+        yield return req.SendWebRequest();
         //Debug.Log(req.isHttpError);
         //Debug.Log(req.isNetworkError);
         //Debug.Log(req.downloadHandler.text);
 
-        while (true)
+        if (req.isDone && !req.isNetworkError)
         {
-            if (req.isDone && !req.isNetworkError)
-            {
-                Debug.Log("Recieved this: " + req.downloadHandler.text);
-                //yield return req.downloadHandler.text;
+            Debug.Log("Recieved this: " + req.downloadHandler.text);
+            //yield return req.downloadHandler.text;
 
-                StopCoroutine(GetHighScores());
-                StartCoroutine(GetHighScores());
-                break;
-            }
+            StartCoroutine(GetHighScores());
         }
 
         //HttpWebRequest request = (HttpWebRequest)WebRequest.Create(string.Format("http://localhost:5000"));
